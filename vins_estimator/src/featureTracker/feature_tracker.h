@@ -46,6 +46,7 @@ public:
     void setMask();
     void addPoints();
     void readIntrinsicParameter(const vector<string> &calib_file);
+    void loadMask(const string &filepath);
     void showUndistortion(const string &name);
     void rejectWithF();
     void undistortedPoints();
@@ -70,6 +71,7 @@ public:
     cv::Mat imTrack;
     cv::Mat mask;
     cv::Mat fisheye_mask;
+    bool use_mask = false;
     cv::Mat prev_img, cur_img;
     cv::Mat prev_desc;
     cv::Mat cur_desc;

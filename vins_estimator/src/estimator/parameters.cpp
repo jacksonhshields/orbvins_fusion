@@ -45,6 +45,8 @@ map<int, Eigen::Vector3d> pts_gt;
 std::string IMAGE0_TOPIC, IMAGE1_TOPIC;
 std::string FISHEYE_MASK;
 std::vector<std::string> CAM_NAMES;
+int USE_MASK;
+//std::string FISHEYE_MASK;
 int MAX_CNT;
 float MATCH_RATIO;
 float EPIPOLAR_TOLERANCE;
@@ -100,6 +102,9 @@ void readParameters(std::string config_file)
 
     USE_GPU = fsSettings["use_gpu"];
     USE_GPU_ACC_FLOW = fsSettings["use_gpu_acc_flow"];
+
+    USE_MASK = fsSettings["use_mask"];
+    fsSettings["fisheye_mask"] >> FISHEYE_MASK;
 
     USE_IMU = fsSettings["imu"];
     printf("USE_IMU: %d\n", USE_IMU);

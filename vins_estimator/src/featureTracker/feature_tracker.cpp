@@ -55,7 +55,12 @@ FeatureTracker::FeatureTracker()
 
 void FeatureTracker::setMask()
 {
-    mask = cv::Mat(row, col, CV_8UC1, cv::Scalar(255));
+    if(use_mask) {
+        mask = fisheye_mask.clone();
+        std::cout << "Setting mask" << std::endl;
+    }
+    else
+        mask = cv::Mat(ROW, COL, CV_8UC1, cv::Scalar(255));
 
     // prefer to keep features that are tracked for long time
     vector<pair<int, pair<cv::Point2f, int>>> cnt_pts_id;
@@ -166,6 +171,7 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
                 cv::cuda::GpuMat d_prevPts;
                 TicToc t_gg;
                 cv::cuda::GpuMat gpu_mask;
+                gpu_mask.upload(mask);
                 cv::Ptr<cv::cuda::ORB> detector = cv::cuda::ORB::create(MAX_CNT); //use default values for everything 
                 detector->detectAndCompute(cur_gpu_img, gpu_mask, keypoints1, cur_desc_gpu, false);
                 
@@ -473,6 +479,7 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
 
 		//detect ORB keypoints and descriptors in right image
                 cv::cuda::GpuMat gpu_mask;
+                gpu_mask.upload(mask);
 		cur_desc_gpu.release();
                 cv::Ptr<cv::cuda::ORB> detector = cv::cuda::ORB::create(MAX_CNT); //use default values for everything
                 detector->detectAndCompute(right_gpu_Img, gpu_mask, keypoints2, cur_desc_gpu, false);
@@ -913,4 +920,19 @@ void FeatureTracker::removeOutliers(set<int> &removePtsIds)
 cv::Mat FeatureTracker::getTrackImage()
 {
     return imTrack;
+}
+
+void FeatureTracker::loadMask(const string &filepath)
+{
+    fisheye_mask = cv::imread(filepath, 0);
+    if(!fisheye_mask.data)
+    {
+        ROS_INFO("load mask fail");
+        ROS_BREAK();
+    }
+    else
+    {
+        ROS_INFO("load mask success");
+        use_mask = true;
+    }
 }
